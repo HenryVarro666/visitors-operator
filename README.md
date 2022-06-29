@@ -19,7 +19,7 @@ make install run
 The necessary Custom Resource Definition called VisitorsApp should be automatically created. Then create a Custom Resource (CR) by applying the yaml file in the config/samples/ folder:
 
 ```shell
-kubectl apply -f config/samples/example.com_v1beta1_visitorsapp.yaml
+kubectl apply -f config/samples/example.com_v1beta1_visitorsapp.yaml -n visitors-operator-system
 ```
 
 A CR called visitorsapp-sample should have been generated. But note that by now, neither frontend pods nor backend pods are created. This is because they are all waiting for the database pods to be up. However, our operator no longer create MySQL pods by ourselves like the old version does. In order to make it easier to achieve capability levels 3 to 5, an open source MySQL operator is needed to create a MySQL cluster. And in our demo, we choose presslabs (or bitpoke) MySQL Operator.
@@ -27,14 +27,17 @@ A CR called visitorsapp-sample should have been generated. But note that by now,
 Helm, a package manager for Kubernetes can be helpful for an easy installation of the Operators published on artifacthub.io. Only one single command should be enough. Make sure that you have Helm installed on your computer, and have added presslabs to your repositories:
 
 ```shell
-helm install mysql-operator presslabs/mysql-operator
+helm install mysql-operator bitpoke/mysql-operator -n visitors-operator-system
 ```
 
+```shell
+helm install mysql-operator pressalabs/mysql-operator -n visitors-operator-system
+```
 Then, you are able to create the MySQL cluster by first creating the database’s secret, and then the database cluster itself:
 
 ```shell
-kubectl apply -f config/samples/mysql/example-cluster-secret.yaml
-kubectl apply -f config/samples/mysql/example-cluster.yaml
+kubectl apply -f config/samples/mysql/example-cluster-secret.yaml -n visitors-operator-system
+kubectl apply -f config/samples/mysql/example-cluster.yaml -n visitors-operator-system
 ```
 
 Now, after some time, you should see that pods of database, backend, and frontend are all running as expected. You can test your application is running by open your browser and go to the site: http://<minikubeIP>:30686/. Now each page refresh can add another visit record to the table displayed. 
@@ -68,13 +71,13 @@ First, enter the backup credentials in example-backup-secret.yaml, example-backu
 In this level, functionalities including monitoring and alerting can be realized with the help of prometheus, an open-source toolkit for monitoring the state of cluster, and sending alert when any rule is broken. For installation, we can use Helm again. After adding prometheus-community to your repositories, run:
 
 ```shell
-helm install prometheus prometheus-community/kube-prometheus-stack
+helm install prometheus prometheus-community/kube-prometheus-stack -n visitors-operator-system
 ```
 
 In order for prometheus to understand the metrics sent by MySQL, a MySQL exporter is need to change the metrics to the proper form that can be understood by prometheus:
 
 ```shell
-helm install mysql-exporter prometheus-community/prometheus-mysql-exporter -f config/samples/mysql-exporter/values.yaml
+helm install mysql-exporter prometheus-community/prometheus-mysql-exporter -f config/samples/mysql-exporter/values.yaml -n visitors-operator-system
 ```
 
 After doing port-forward for the prometheus service, you can go to the prometheus page (localhost:9090) to check your cluster components that are being monitored by prometheus as well as all the rules and alerts. A service monitor for MySQL should be one of the targets if MySQL exporter is correctly installed.
@@ -90,7 +93,7 @@ Kubernetes has an API resource called Horizontal Pod Autoscaler (HPA) that is ab
 Before creating an HPA, prometheus adapter must be installed to make HPA able to collect the metrics from prometheus:
 
 ```shell
-helm install prometheus-adapter prometheus-community/prometheus-adapter -f config/samples/prometheus-adapter/values.yaml
+helm install prometheus-adapter prometheus-community/prometheus-adapter -f config/samples/prometheus-adapter/values.yaml -n visitors-operator-system
 ```
 
 ### Backend Auto-scaling

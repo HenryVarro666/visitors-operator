@@ -2,11 +2,12 @@ apiVersion: example.com.my.domain/v1beta1
 kind: VisitorsApp
 metadata:
   name: visitorsapp-sample
+  namespace: visitors-operator-system
 spec:
   backendSize: 1
-  backendAutoScaling: false
+  backendAutoScaling: true
   backendServiceNodePort: 30685
   frontendTitle: "visitors app"
   frontendSize: 1
-  frontendAutoScaling: false
+  frontendAutoScaling: true
   frontendServiceNodePort: 30686
