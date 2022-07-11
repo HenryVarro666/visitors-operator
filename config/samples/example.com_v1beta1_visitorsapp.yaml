@@ -5,9 +5,9 @@ metadata:
   namespace: visitors-operator-system
 spec:
   backendSize: 1
-  backendAutoScaling: true
+  backendAutoScaling: false
   backendServiceNodePort: 30685
   frontendTitle: "visitors app"
   frontendSize: 1
-  frontendAutoScaling: true
+  frontendAutoScaling: false
   frontendServiceNodePort: 30686
